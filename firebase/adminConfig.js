@@ -1,18 +1,12 @@
-// firebase/adminConfig.js
-
+require('dotenv').config();
 const admin = require('firebase-admin');
-const path = require('path');
-require('dotenv').config(); // ← Asegúrate de tener esto para leer .env
 
-// Leer la ruta desde la variable de entorno
-const serviceAccountPath = process.env.FIREBASE_KEY_PATH;
-
-// Cargar el archivo de credenciales dinámicamente
-const serviceAccount = require(path.resolve(serviceAccountPath));
+// Leer el JSON desde la variable de entorno
+const serviceAccount = JSON.parse(process.env.FIREBASE_KEY_JSON);
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  projectId: "qrclasscheck-6e75e"
+  projectId: serviceAccount.project_id
 });
 
 const db = admin.firestore();
