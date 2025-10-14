@@ -1,0 +1,30 @@
+{
+  "name": "backend_qrclasscheck",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/EdgarParada03/QRClassCheck_backend#readme",
+  "bugs": {
+    "url": "https://github.com/EdgarParada03/QRClassCheck_backend/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EdgarParada03/QRClassCheck_backend.git"
+  },
+  "license": "ISC",
+  "author": "Edgar Parada",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "firebase-admin": "^13.5.0",
+    "google-auth-library": "^10.4.0",
+    "moment": "^2.30.1",
+    "qrcode": "^1.5.4"
+  }
+}
