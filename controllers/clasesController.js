@@ -4,12 +4,13 @@ const { generarQR } = require('../utils/qrGenerator');
 const crearClase = async (req, res) => {
   try {
     const {
-      dia, // ← ahora es texto: "Lunes", "Martes", etc.
+      dia,
       hora_inicio,
       hora_fin,
       asignatura,
       semestre,
-      docente_id
+      docente_id,
+      tema // ← nuevo campo recibido desde el frontend
     } = req.body;
 
     // Validación: día permitido
@@ -72,12 +73,13 @@ const crearClase = async (req, res) => {
 
     // 3. Crear clase
     const nuevaClase = {
-      dia, // ← ahora es texto
+      dia,
       hora_inicio,
       hora_fin,
       asignatura_id,
       docente_id,
       semestre_id,
+      tema: tema || '', // ← se guarda el tema, puede ser texto largo
       qrHash: '',
       timestamp: Date.now()
     };
@@ -118,6 +120,7 @@ const getClasesPorDocente = async (req, res) => {
         dia: clase.dia,
         hora_inicio: clase.hora_inicio,
         hora_fin: clase.hora_fin,
+        tema: clase.tema || '', // ← incluir el campo tema en la respuesta
         qrHash: clase.qrHash,
         asignatura,
         semestre
