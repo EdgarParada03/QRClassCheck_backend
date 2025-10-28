@@ -32,7 +32,7 @@ const crearClase = async (req, res) => {
     const rangoMax = convertirHora("22:05");
 
     if (inicioMinutos < rangoMin || inicioMinutos > rangoMax ||
-        finMinutos < rangoMin || finMinutos > rangoMax) {
+      finMinutos < rangoMin || finMinutos > rangoMax) {
       return res.status(400).json({ error: 'Las clases deben estar entre 6:00 AM y 10:05 PM' });
     }
 
@@ -88,7 +88,17 @@ const crearClase = async (req, res) => {
     const qr = await generarQR(`https://tuapp.com/asistencia/${claseRef.id}`);
     await claseRef.update({ qrHash: qr });
 
-    res.status(201).json({ id: claseRef.id, qr });
+    res.status(201).json({
+      id: claseRef.id,
+      dia,
+      hora_inicio,
+      hora_fin,
+      tema: tema || '',
+      qrHash: qr,
+      asignatura,
+      semestre
+    });
+
   } catch (error) {
     console.error('Error al crear clase:', error);
     res.status(500).json({ error: 'Error al crear clase' });
