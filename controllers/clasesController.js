@@ -85,7 +85,7 @@ const crearClase = async (req, res) => {
     };
 
     const claseRef = await db.collection('clases').add(nuevaClase);
-    const qr = await generarQR(`https://tuapp.com/asistencia/${claseRef.id}`);
+    const qr = await generarQR(`https://qr-class-check-frontend.vercel.app/asistencia/${claseRef.id}`);
     await claseRef.update({ qrHash: qr });
 
     res.status(201).json({
