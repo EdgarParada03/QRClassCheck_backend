@@ -1,4 +1,3 @@
-// routes/auth.js
 const express = require('express');
 const router = express.Router();
 const { OAuth2Client } = require('google-auth-library');
@@ -8,7 +7,7 @@ const CLIENT_ID = '485928313600-12l15gbi99ic35bp92gv2iud166fh1qk.apps.googleuser
 const client = new OAuth2Client(CLIENT_ID);
 
 router.post('/google', async (req, res) => {
-  const { idToken } = req.body;
+  const { idToken, es_docente } = req.body; // ← ahora se acepta es_docente
 
   try {
     const ticket = await client.verifyIdToken({
@@ -28,7 +27,7 @@ router.post('/google', async (req, res) => {
       const nuevoUsuario = {
         nombre_completo: name,
         correo: email,
-        es_docente: true,
+        es_docente: es_docente === false ? false : true // ← usa el valor enviado, por defecto true
       };
       const docRef = await usuariosRef.add(nuevoUsuario);
       userDoc = { id: docRef.id, ...nuevoUsuario };
