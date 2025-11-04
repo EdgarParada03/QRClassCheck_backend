@@ -6,10 +6,11 @@ const app = express();
 
 // ✅ Configuración de CORS para permitir solicitudes desde el frontend
 app.use(cors({
-  origin: 'https://qr-class-check-frontend.vercel.app', // dominio del frontend
+  origin: 'https://qr-class-check-frontend.vercel.app',
   methods: ['GET', 'POST'],
   credentials: true
 }));
+
 
 // ✅ Middleware para parsear JSON
 app.use(bodyParser.json());

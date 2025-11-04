@@ -69,19 +69,26 @@ const enviarReportePorCorreo = async (req, res) => {
     const { idClase } = req.params;
     const { email } = req.body;
 
+    console.log("📩 Petición recibida para enviar reporte", { idClase, email });
+
     if (!email || typeof email !== 'string' || !email.includes('@')) {
+      console.warn("⚠️ Email inválido:", email);
       return res.status(400).json({ error: 'Email inválido o no proporcionado' });
     }
 
     const buffer = await generarPDFBuffer(idClase);
+    console.log("✅ PDF generado correctamente");
+
     await enviarCorreoConAdjunto(email, buffer, `Reporte_${idClase}.pdf`);
+    console.log("✅ Correo enviado correctamente a", email);
 
     res.status(200).json({ mensaje: 'Reporte enviado correctamente' });
   } catch (error) {
-    console.error('Error al enviar reporte:', error);
-    res.status(500).json({ error: 'Error al enviar reporte' });
+    console.error("❌ Error en enviarReportePorCorreo:", error);
+    res.status(500).json({ error: 'Error al enviar reporte', detalle: error.message });
   }
 };
+
 
 
 module.exports = {
