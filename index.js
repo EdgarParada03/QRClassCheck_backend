@@ -3,7 +3,17 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 
 const app = express();
-app.use(cors());
+//app.use(cors());
+
+//manejo del cors
+const cors = require('cors');
+
+app.use(cors({
+  origin: 'https://qr-class-check-frontend.vercel.app', // dominio del frontend
+  methods: ['GET', 'POST'],
+  credentials: true
+}));
+
 app.use(bodyParser.json());
 app.use(express.json()); // ya no lo repetimos más abajo
 
