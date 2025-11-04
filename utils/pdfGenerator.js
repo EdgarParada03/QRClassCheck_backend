@@ -10,7 +10,21 @@ const generarPDFBuffer = async (idClase) => {
 
   // Obtener datos de clase
   const claseSnap = await db.collection('clases').doc(idClase).get();
-  if (!claseSnap.exists) throw new Error('Clase no encontrada');
+
+  //nuevo codigo
+
+  try {
+    const buffer = await generarPDFBuffer(idClase);
+  } catch (err) {
+    if (err.message === 'Clase no encontrada') {
+      return res.status(404).json({ error: 'Clase no encontrada para generar el PDF' });
+    }
+    throw err;
+  }
+
+
+
+  ///
   const clase = claseSnap.data();
 
   const asignaturaSnap = await db.collection('asignaturas').doc(clase.asignatura_id).get();

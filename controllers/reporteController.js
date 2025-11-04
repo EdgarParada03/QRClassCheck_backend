@@ -69,6 +69,10 @@ const enviarReportePorCorreo = async (req, res) => {
     const { idClase } = req.params;
     const { email } = req.body;
 
+    if (!email || typeof email !== 'string' || !email.includes('@')) {
+      return res.status(400).json({ error: 'Email inválido o no proporcionado' });
+    }
+
     const buffer = await generarPDFBuffer(idClase);
     await enviarCorreoConAdjunto(email, buffer, `Reporte_${idClase}.pdf`);
 
@@ -78,6 +82,7 @@ const enviarReportePorCorreo = async (req, res) => {
     res.status(500).json({ error: 'Error al enviar reporte' });
   }
 };
+
 
 module.exports = {
   obtenerReporte,
