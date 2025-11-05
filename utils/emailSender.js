@@ -1,34 +1,25 @@
-const nodemailer = require('nodemailer');
+const sgMail = require('@sendgrid/mail');
+
+// Configurar la API Key de SendGrid desde variables de entorno
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const enviarCorreoConAdjunto = async (destinatario, pdfBuffer, nombreArchivo) => {
-  const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 465,
-    secure: true, // true para 465, false para 587
-    auth: {
-      user: process.env.CORREO_EMISOR,
-      pass: process.env.CORREO_CLAVE
-    },
-    tls: {
-      rejectUnauthorized: false
-    }
-  });
-
-
-  const mailOptions = {
-    from: `"QRClassCheck" <${process.env.CORREO_EMISOR}>`,
+  const msg = {
     to: destinatario,
+    from: process.env.CORREO_EMISOR, // ⚠️ Debe estar verificado en SendGrid
     subject: 'Reporte de asistencia',
     text: 'Adjunto encontrarás el reporte de asistencia en formato PDF.',
     attachments: [
       {
+        content: pdfBuffer.toString("base64"), // SendGrid requiere base64
         filename: nombreArchivo,
-        content: pdfBuffer
+        type: "application/pdf",
+        disposition: "attachment"
       }
     ]
   };
 
-  await transporter.sendMail(mailOptions);
+  await sgMail.send(msg);
 };
 
 module.exports = { enviarCorreoConAdjunto };
