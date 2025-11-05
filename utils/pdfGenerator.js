@@ -2,66 +2,54 @@ const PDFDocument = require('pdfkit');
 const { db } = require('../firebase/adminConfig');
 
 const generarPDFBuffer = async (idClase) => {
-  const doc = new PDFDocument();
-  const buffers = [];
+  return new Promise(async (resolve, reject) => {
+    try {
+      const doc = new PDFDocument();
+      const buffers = [];
 
-  doc.on('data', buffers.push.bind(buffers));
-  doc.on('end', () => {});
+      doc.on('data', buffers.push.bind(buffers));
+      doc.on('end', () => resolve(Buffer.concat(buffers)));
+      doc.on('error', reject);
 
-  // Obtener datos de clase
-  const claseSnap = await db.collection('clases').doc(idClase).get();
+      // --- Datos de la clase ---
+      const claseSnap = await db.collection('clases').doc(idClase).get();
+      if (!claseSnap.exists) throw new Error('Clase no encontrada');
+      const clase = claseSnap.data();
 
-  //nuevo codigo
+      const asignaturaSnap = await db.collection('asignaturas').doc(clase.asignatura_id).get();
+      const asignatura = asignaturaSnap.exists ? asignaturaSnap.data() : {};
 
-  try {
-    const buffer = await generarPDFBuffer(idClase);
-  } catch (err) {
-    if (err.message === 'Clase no encontrada') {
-      return res.status(404).json({ error: 'Clase no encontrada para generar el PDF' });
+      // --- Encabezado ---
+      doc.fontSize(16).text(`Reporte de Asistencia`, { align: 'center' });
+      doc.moveDown();
+      doc.fontSize(12).text(`Asignatura: ${asignatura.nombre} (${asignatura.codigo})`);
+      doc.text(`Horario: ${clase.dia} de ${clase.hora_inicio} a ${clase.hora_fin}`);
+      doc.moveDown();
+
+      // --- Asistencias ---
+      const asistenciasSnap = await db.collection('asistencias')
+        .where('clase_id', '==', idClase)
+        .get();
+
+      doc.fontSize(12).text(`Asistencias registradas:`);
+      doc.moveDown();
+
+      for (const docSnap of asistenciasSnap.docs) {
+        const asistencia = docSnap.data();
+        const usuarioSnap = await db.collection('usuarios').doc(asistencia.usuario_id).get();
+        const nombre = usuarioSnap.exists ? usuarioSnap.data().nombre_completo : 'Desconocido';
+
+        const fechaObj = new Date(asistencia.timestamp);
+        const fecha = fechaObj.toISOString().split('T')[0];
+        const hora = fechaObj.toTimeString().split(' ')[0].slice(0, 5);
+
+        doc.text(`• ${nombre} — ${fecha} ${hora}`);
+      }
+
+      doc.end();
+    } catch (err) {
+      reject(err);
     }
-    throw err;
-  }
-
-
-
-  ///
-  const clase = claseSnap.data();
-
-  const asignaturaSnap = await db.collection('asignaturas').doc(clase.asignatura_id).get();
-  const asignatura = asignaturaSnap.exists ? asignaturaSnap.data() : {};
-
-  // Encabezado
-  doc.fontSize(16).text(`Reporte de Asistencia`, { align: 'center' });
-  doc.moveDown();
-  doc.fontSize(12).text(`Asignatura: ${asignatura.nombre} (${asignatura.codigo})`);
-  doc.text(`Horario: ${clase.dia} de ${clase.hora_inicio} a ${clase.hora_fin}`);
-  doc.moveDown();
-
-  // Tabla de asistencias
-  doc.fontSize(12).text(`Asistencias registradas:`);
-  doc.moveDown();
-
-  const asistenciasSnap = await db.collection('asistencias')
-    .where('clase_id', '==', idClase)
-    .get();
-
-  for (const docSnap of asistenciasSnap.docs) {
-    const asistencia = docSnap.data();
-    const usuarioSnap = await db.collection('usuarios').doc(asistencia.usuario_id).get();
-    const nombre = usuarioSnap.exists ? usuarioSnap.data().nombre_completo : 'Desconocido';
-
-    const fechaObj = new Date(asistencia.timestamp);
-    const fecha = fechaObj.toISOString().split('T')[0];
-    const hora = fechaObj.toTimeString().split(' ')[0].slice(0, 5);
-
-    doc.text(`• ${nombre} — ${fecha} ${hora}`);
-  }
-
-  doc.end();
-
-  return new Promise((resolve, reject) => {
-    doc.on('end', () => resolve(Buffer.concat(buffers)));
-    doc.on('error', reject);
   });
 };
 
