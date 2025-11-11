@@ -47,7 +47,8 @@ const registrarAsistenciaConToken = async (req, res) => {
     const nuevaAsistencia = {
       usuario_id,
       clase_id,
-      timestamp: new Date().toISOString()
+      // Guardar hora local de Colombia
+      timestamp: new Date().toLocaleString("es-CO", { timeZone: "America/Bogota" })
     };
 
     const docRef = await db.collection('asistencias').add(nuevaAsistencia);
