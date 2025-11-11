@@ -1,3 +1,4 @@
+// src/utils/pdfGenerator.js
 const PDFDocument = require('pdfkit');
 const { db } = require('../firebase/adminConfig');
 
@@ -39,9 +40,24 @@ const generarPDFBuffer = async (idClase) => {
         const usuarioSnap = await db.collection('usuarios').doc(asistencia.usuario_id).get();
         const nombre = usuarioSnap.exists ? usuarioSnap.data().nombre_completo : 'Desconocido';
 
-        const fechaObj = new Date(asistencia.timestamp);
-        const fecha = fechaObj.toISOString().split('T')[0];
-        const hora = fechaObj.toTimeString().split(' ')[0].slice(0, 5);
+        let fecha = "Inválida";
+        let hora = "Inválida";
+
+        try {
+          const fechaObj = new Date(asistencia.timestamp);
+          if (!isNaN(fechaObj)) {
+            // Convertir a fecha/hora local de Colombia
+            fecha = fechaObj.toLocaleDateString("es-CO", { timeZone: "America/Bogota" });
+            hora = fechaObj.toLocaleTimeString("es-CO", { timeZone: "America/Bogota", hour: "2-digit", minute: "2-digit" });
+          } else {
+            // Si no se puede parsear, usar el string tal cual
+            const partes = asistencia.timestamp.split(",");
+            fecha = partes[0] || asistencia.timestamp;
+            hora = partes[1]?.trim() || "";
+          }
+        } catch (err) {
+          console.error("Error parseando timestamp:", asistencia.timestamp, err);
+        }
 
         doc.text(`• ${nombre} — ${fecha} ${hora}`);
       }
