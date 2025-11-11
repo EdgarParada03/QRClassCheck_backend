@@ -27,9 +27,25 @@ const obtenerReporte = async (req, res) => {
       const usuarioSnap = await db.collection('usuarios').doc(asistencia.usuario_id).get();
       const estudiante = usuarioSnap.exists ? usuarioSnap.data().nombre_completo : 'Desconocido';
 
-      const fechaObj = new Date(asistencia.timestamp);
-      const fecha = fechaObj.toISOString().split('T')[0];
-      const hora = fechaObj.toTimeString().split(' ')[0].slice(0, 5);
+      let fecha = "Inválida";
+      let hora = "Inválida";
+
+      try {
+        // Intentar parsear el timestamp
+        const fechaObj = new Date(asistencia.timestamp);
+        if (!isNaN(fechaObj)) {
+          // Convertir a fecha/hora local de Colombia
+          fecha = fechaObj.toLocaleDateString("es-CO", { timeZone: "America/Bogota" });
+          hora = fechaObj.toLocaleTimeString("es-CO", { timeZone: "America/Bogota", hour: "2-digit", minute: "2-digit" });
+        } else {
+          // Si no se puede parsear, usar el string tal cual
+          const partes = asistencia.timestamp.split(",");
+          fecha = partes[0] || asistencia.timestamp;
+          hora = partes[1]?.trim() || "";
+        }
+      } catch (err) {
+        console.error("Error parseando timestamp:", asistencia.timestamp, err);
+      }
 
       asistencias.push({ estudiante, fecha, hora });
     }
@@ -88,8 +104,6 @@ const enviarReportePorCorreo = async (req, res) => {
     res.status(500).json({ error: 'Error al enviar reporte', detalle: error.message });
   }
 };
-
-
 
 module.exports = {
   obtenerReporte,
